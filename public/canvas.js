@@ -1,3 +1,5 @@
+// Draw canvas
+// imgs object's array
 const sprites = [{
     src: "./images/sprites/boss00001.png"
   },
@@ -11,8 +13,11 @@ const sprites = [{
     src: "./images/sprites/boss30001.png"
   }
 ]
+
+// load images
 loadImage()
 
+// draw canvas
 function draw() {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -48,6 +53,7 @@ function draw() {
   requestAnimationFrame(draw)
 }
 
+// Player mouse controls
 canvas.addEventListener("mousemove", (event) => {
   const mousePosition = {
     x: event.clientX,
@@ -72,6 +78,7 @@ canvas.addEventListener("mousemove", (event) => {
   player.yVector = yVector
 })
 
+// Load imgs
 function loadImage() {
   for (var i = 0; i < 4; i++) {
     sprite = new Image();
