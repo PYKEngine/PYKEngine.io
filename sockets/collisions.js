@@ -1,6 +1,7 @@
 const Virus = require('./classes/Virus')
 const io = require('../server').io;
 
+// Check collisions between players and other players/viruses (pythagore)
 function checkForVirusCollisions(pData, pConfig, viruses, settings) {
   return new Promise((resolve, reject) => {
     viruses.forEach((virus, i) => {
