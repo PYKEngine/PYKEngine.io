@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Create Shema
+// Create Shema for database
 const LBSchema = new Schema({
   name: {
     type: String,
