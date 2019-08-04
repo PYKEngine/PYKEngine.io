@@ -4,6 +4,7 @@ let player = {}
 let viruses = []
 let players = []
 
+// Manage DOM, get player name and init the game
 let canvas = document.querySelector('#the-canvas');
 let ctx = canvas.getContext('2d');
 canvas.width = wWidth;
