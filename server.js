@@ -1,3 +1,4 @@
+// Server config file
 const express = require("express")
 const socketio = require("socket.io")
 const hbs = require("hbs")
