@@ -1,15 +1,25 @@
+// Main server side file
 const mongoose = require("mongoose")
+// Get io
 const io = require("../server").io;
+// Get Mongoose Schema
 require("../models/LeaderBoard");
+// Get collisions management
 const checkForVirusCollisions = require("./collisions").checkForVirusCollisions;
 const checkForPlayerCollisions = require("./collisions")
   .checkForPlayerCollisions;
 
+// Player class
 const Player = require("./classes/Player");
+// Get player public data (send to the clients)
 const PlayerData = require("./classes/PlayerData");
+// Get player private data (always remain on the server to prevent hacks)
 const PlayerConfig = require("./classes/PlayerConfig");
+// Get Viruses config (to client side)
 const Virus = require("./classes/Virus");
+// Define mongoose Schema
 const LB = mongoose.model("leaderBoard");
+// Locals variables
 let viruses = [];
 players = [];
 let settings = {
@@ -21,8 +31,10 @@ let settings = {
   worldHeight: 5000
 };
 
+// This function init the game
 initGame();
 
+// This send updated players datas to the clients on every frame 60 times a second
 setInterval(() => {
   if (players.length > 0) {
     io.to("game").emit("tock", {
@@ -31,24 +43,32 @@ setInterval(() => {
   }
 }, 1000 / 60);
 
+// This define what the server do on a player connection
 io.sockets.on("connect", socket => {
   let player = {};
+  // init the game
   socket.on("init", data => {
+    // Creating roomspace (possibility for chatroom)
     socket.join("game");
+    // generate player data and config to create a new player
     let playerConfig = new PlayerConfig(settings);
     let playerData = new PlayerData(data.playerName, settings);
     player = new Player(socket.id, playerConfig, playerData);
+    // Manage client/server interation (send updated player's position)
     setInterval(() => {
       socket.emit("tickTock", {
         playerX: player.playerData.locX,
         playerY: player.playerData.locY
       });
     }, 1000 / 60);
+    // send generated viruses to the clients
     socket.emit("initReturn", {
       viruses
     });
+    // Add a new player to the current game
     players.push(playerData);
   });
+  // Manage data from the clients to update players position
   socket.on("tick", data => {
     speed = player.playerConfig.speed;
     xV = player.playerConfig.xVector = data.xVector;
@@ -68,6 +88,7 @@ io.sockets.on("connect", socket => {
       player.playerData.locX += speed * xV;
       player.playerData.locY -= speed * yV;
     }
+    // Manage collisions 
     let capturedVirus = checkForVirusCollisions(
       player.playerData,
       player.playerConfig,
@@ -97,6 +118,7 @@ io.sockets.on("connect", socket => {
       // No player collision
     });
   });
+  // When a player disconnect from the game
   socket.on("disconnect", (data) => {
     // updateLocalLeaderBoard(player.playerData.name)
     if (player.playerData) {
@@ -115,17 +137,11 @@ io.sockets.on("connect", socket => {
             )
         }
       })
-      const updateStats = `
-      UPDATE stats
-          SET highScore = CASE WHEN highScore < ? THEN ? ELSE highScore END,
-          mostOrbs = CASE WHEN mostOrbs < ? THEN ? ELSE mostOrbs END,
-          mostPlayers = CASE WHEN mostPlayers < ? THEN ? ELSE mostPlayers END
-      WHERE username = ?
-      `
     }
   })
 })
 
+// LeaderBoard Datas
 function getLeaderBoard() {
   players.sort((a, b) => {
     return b.score - a.score
@@ -139,6 +155,7 @@ function getLeaderBoard() {
   return leaderBoard
 }
 
+// Generate Viruses on initGame 
 function initGame() {
   for (let i = 0; i < settings.defaultViruses; i++) {
     viruses.push(new Virus(settings));
